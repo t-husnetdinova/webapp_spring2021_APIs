@@ -17,4 +17,3 @@ router.use("/", homeRoutes);
 router.use("/", errorRoutes);
 
 module.exports = router;
-

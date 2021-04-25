@@ -1,6 +1,8 @@
 "use strict";
 
-const Course = require("../models/course");
+const Course = require("../models/course"),
+    httpStatus = require("http-status-codes"),
+    User = require("../models/user");
 
 module.exports = {
     index: (req, res, next) => {
@@ -164,4 +166,4 @@ module.exports = {
             next(new Error("User must log in."));
         }
     }
-}
+};

@@ -7,12 +7,14 @@ userRoutes = require("./userRoutes"),
 subscriberRoutes = require("./subscriberRoutes"),
 courseRoutes = require("./courseRoutes"),
 homeRoutes = require("./homeRoutes"),
-errorRoutes = require("./errorRoutes");
+errorRoutes = require("./errorRoutes"),
+apiRoutes = require("./apiRoutes");
 
 // define namespaces for routes
 router.use("/users", userRoutes);
 router.use("/subscribers", subscriberRoutes);
 router.use("/courses", courseRoutes);
+router.use("/api", apiRoutes);
 router.use("/", homeRoutes);
 router.use("/", errorRoutes);
 

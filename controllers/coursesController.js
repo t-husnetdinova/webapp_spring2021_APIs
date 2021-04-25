@@ -79,31 +79,89 @@ module.exports = {
         // });
         var updatedCourse = {};
         updatedCourse.title = req.body.title;
-        updatedCourse.description =  req.body.description;
+        updatedCourse.description = req.body.description;
         updatedCourse.maxStudent = req.body.maxStudent;
         updatedCourse.cost = req.body.cost;
 
         Course.findByIdAndUpdate(courseId, updatedCourse)
-        .then(course => {
-            res.locals.course = course;
-            res.locals.redirect = `/courses/${course._id}`;
-            next();
-        })
-        .catch(error => {
-            console.log(`Error loading course by ID: ${error.message}`);
-            next(error);
-        })
-    }, 
+            .then(course => {
+                res.locals.course = course;
+                res.locals.redirect = `/courses/${course._id}`;
+                next();
+            })
+            .catch(error => {
+                console.log(`Error loading course by ID: ${error.message}`);
+                next(error);
+            })
+    },
     delete: (req, res, next) => {
         let courseId = req.params.id;
         Course.findByIdAndRemove(courseId)
-        .then(() => {
-            res.locals.redirect = "/courses";
+            .then(() => {
+                res.locals.redirect = "/courses";
+                next();
+            })
+            .catch(error => {
+                console.log(`Error loading course by ID: ${error.message}`);
+                next(error);
+            });
+    },
+    respondJSON: (req, res) => {
+        res.json({
+            status: httpStatus.OK,
+            data: res.locals
+        });
+    },
+    errorJSON: (error, req, res, next) => {
+        let errorObject;
+
+        if (error) {
+            errorObject = {
+                status: httpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message
+            };
+        } else {
+            errorObject = {
+                status: httpStatus.INTERNAL_SERVER_ERROR,
+                message: "Unknown Error."
+            };
+        }
+        res.json(errorObject);
+    },
+    filterUserCourses: (req, res, next) => {
+        let currentUser = res.locals.currentUser;
+        if (currentUser) {
+            let mappedCourses = res.locals.courses.map((course) => {
+                let userJoined = currentUser.courses.some((userCourse) => {
+                    return userCourse.equals(course._id);
+                });
+                return Object.assign(course.toObject(), { joined: userJoined });
+            });
+            res.locals.courses = mappedCourses;
             next();
-        })
-        .catch(error => {
-            console.log(`Error loading course by ID: ${error.message}`);
-            next(error);
-        })
+        } else {
+            next();
+        }
+    },
+    join: (req, res, next) => {
+        let courseId = req.params.id,
+            currentUser = req.user;
+
+        if (currentUser) {
+            User.findByIdAndUpdate(currentUser, {
+                $addToSet: {
+                    courses: courseId
+                }
+            })
+                .then(() => {
+                    res.locals.success = true;
+                    next();
+                })
+                .catch(error => {
+                    next(error);
+                });
+        } else {
+            next(new Error("User must log in."));
+        }
     }
 }

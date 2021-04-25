@@ -2,7 +2,7 @@ const { authenticate } = require("./models/user");
 
 const express = require("express"), 
     app = express(),
-    router = require("./routes/index"), // routes come from router index
+    router = require("./routes/index"),
     layouts = require("express-ejs-layouts"), 
     mongoose = require("mongoose"),
     methodOverride = require("method-override"),
